@@ -1,0 +1,56 @@
+NextCast.fm - A Podcast Player
+================================
+
+NextCast.fm is a fork of AntennaPod, an open-source podcast player
+originally developed by the AntennaPod team and community contributors.
+
+Original Project
+----------------
+AntennaPod
+Repository: https://github.com/AntennaPod/AntennaPod
+License: GNU General Public License v3.0 (GPL-3.0)
+
+Copyright Notice
+----------------
+Original work copyright (c) 2012-2025 AntennaPod contributors
+Modified work copyright (c) 2025 NextCast.fm contributors
+
+License
+-------
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+Modifications Made
+------------------
+The following modifications have been made to the original AntennaPod project:
+
+1. REBRANDING
+   - Changed application ID from "de.danoeh.antennapod" to "fm.nextcast"
+   - Changed application name from "AntennaPod" to "NextCast.fm"
+   - Updated content provider authorities
+
+2. VERSION RESET
+   - Reset version to 1.0.0 for the fork
+
+Source Code
+-----------
+The complete source code for NextCast.fm is available under the terms of
+GPL-3.0 at: https://github.com/karsentiz/NextCast.fm
+
+Acknowledgments
+---------------
+We gratefully acknowledge the AntennaPod project and all its contributors
+for creating and maintaining the original application.
+
+For a full list of AntennaPod contributors, see:
+https://github.com/AntennaPod/AntennaPod/blob/develop/CONTRIBUTORS.md
