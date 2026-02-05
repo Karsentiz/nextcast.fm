@@ -9,6 +9,7 @@ android {
 }
 
 dependencies {
+    implementation project(':ads')
     implementation project(':event')
     implementation project(':model')
     implementation project(':net:common')

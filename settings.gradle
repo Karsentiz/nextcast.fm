@@ -18,6 +18,7 @@ dependencyResolutionManagement {
 }
 
 include ':app'
+include ':ads'
 include ':event'
 include ':model'
 include ':system'

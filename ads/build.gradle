@@ -1,0 +1,36 @@
+plugins {
+    id('com.android.library')
+}
+apply from: "../common.gradle"
+
+android {
+    namespace "de.danoeh.antennapod.ads"
+
+    defaultConfig {
+        consumerProguardFiles "proguard-rules.pro"
+    }
+}
+
+dependencies {
+    implementation project(':model')
+    implementation project(':storage:preferences')
+    implementation project(':event')
+
+    // Google Mobile Ads SDK (Ad Manager / DFP mode)
+    implementation 'com.google.android.gms:play-services-ads:23.6.0'
+
+    // IMA SDK for audio/video in-stream ads
+    implementation 'com.google.ads.interactivemedia.v3:interactivemedia:3.33.0'
+
+    // AndroidX
+    implementation "androidx.appcompat:appcompat:$appcompatVersion"
+    implementation "androidx.core:core:$coreVersion"
+    implementation "androidx.lifecycle:lifecycle-runtime:2.6.2"
+    implementation "androidx.lifecycle:lifecycle-process:2.6.2"
+
+    // EventBus for ad events
+    implementation "org.greenrobot:eventbus:$eventbusVersion"
+
+    // Logging
+    implementation "org.apache.commons:commons-lang3:$commonslangVersion"
+}
