@@ -207,6 +207,20 @@ public class AdsPolicyManager {
         return episodeStartCount;
     }
 
+    /**
+     * Get session episode count (alias for getEpisodeStartCount).
+     */
+    public int getSessionEpisodeCount() {
+        return episodeStartCount;
+    }
+
+    /**
+     * Get the number of interstitials shown this session.
+     */
+    public int getSessionInterstitialCount() {
+        return sessionInterstitialCount;
+    }
+
     // ============================================
     // SESSION MANAGEMENT
     // ============================================

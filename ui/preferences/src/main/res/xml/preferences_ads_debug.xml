@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:key="ads_status"
+        android:title="Ads Status">
+
+        <Preference
+            android:key="ads_status_info"
+            android:title="Current Status"
+            android:selectable="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="ads_controls"
+        android:title="Ad Controls">
+
+        <SwitchPreferenceCompat
+            android:key="pref_ads_enabled"
+            android:title="Ads Enabled"
+            android:summary="Master switch for all ads"
+            android:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="pref_ads_test_mode"
+            android:title="Test Mode"
+            android:summary="Use test ad units (no revenue)"
+            android:defaultValue="false" />
+
+        <SwitchPreferenceCompat
+            android:key="pref_ads_debug_logging"
+            android:title="Debug Logging"
+            android:summary="Log all ad events to logcat"
+            android:defaultValue="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="ads_format_controls"
+        android:title="Ad Formats">
+
+        <SwitchPreferenceCompat
+            android:key="pref_banners_enabled"
+            android:title="Banner Ads"
+            android:summary="Show banner ads on screens"
+            android:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="pref_interstitials_enabled"
+            android:title="Interstitial Ads"
+            android:summary="Show video interstitial ads"
+            android:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="pref_audio_ads_enabled"
+            android:title="Audio Pre-roll Ads"
+            android:summary="Play audio ads before episodes"
+            android:defaultValue="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="ads_frequency"
+        android:title="Frequency Settings">
+
+        <Preference
+            android:key="pref_interstitial_episode_freq"
+            android:title="Interstitial Episode Frequency"
+            android:summary="Show interstitial every N episodes" />
+
+        <Preference
+            android:key="pref_audio_ad_episode_freq"
+            android:title="Audio Ad Episode Frequency"
+            android:summary="Play audio ad every N episodes" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="ads_actions"
+        android:title="Actions">
+
+        <Preference
+            android:key="pref_reset_ad_counters"
+            android:title="Reset Ad Counters"
+            android:summary="Reset session and episode counters" />
+
+        <Preference
+            android:key="pref_trigger_test_banner"
+            android:title="Show Test Banner"
+            android:summary="Display a test banner ad" />
+
+        <Preference
+            android:key="pref_trigger_test_interstitial"
+            android:title="Show Test Interstitial"
+            android:summary="Display a test interstitial ad" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

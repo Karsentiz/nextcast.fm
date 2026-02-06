@@ -10,6 +10,7 @@ import androidx.preference.Preference;
 import com.bytehamster.lib.preferencesearch.SearchConfiguration;
 import com.bytehamster.lib.preferencesearch.SearchPreference;
 
+import de.danoeh.antennapod.BuildConfig;
 import de.danoeh.antennapod.R;
 import de.danoeh.antennapod.ui.common.IntentUtils;
 import de.danoeh.antennapod.ui.preferences.screen.AnimatedPreferenceFragment;
@@ -36,6 +37,11 @@ public class MainPreferencesFragment extends AnimatedPreferenceFragment {
         addPreferencesFromResource(R.xml.preferences);
         setupMainScreen();
         setupSearch();
+
+        // Add debug menu for ads in debug builds only
+        if (BuildConfig.DEBUG) {
+            setupDebugMenu();
+        }
 
         // If you are writing a spin-off, please update the details on screens like "About" and "Report bug"
         // and afterwards remove the following lines. Please keep in mind that AntennaPod is licensed under the GPL.
@@ -123,6 +129,25 @@ public class MainPreferencesFragment extends AnimatedPreferenceFragment {
                     .addToBackStack(getString(R.string.report_bug_title)).commit();
             return true;
         });
+    }
+
+    private void setupDebugMenu() {
+        // Add debug ads menu entry
+        Preference adsDebugPref = new Preference(requireContext());
+        adsDebugPref.setKey("prefAdsDebug");
+        adsDebugPref.setTitle("Ads Debug");
+        adsDebugPref.setSummary("Debug controls for ad system");
+        adsDebugPref.setIcon(R.drawable.ic_settings);
+        adsDebugPref.setOrder(0); // Put at top
+
+        adsDebugPref.setOnPreferenceClickListener(preference -> {
+            getParentFragmentManager().beginTransaction()
+                    .replace(R.id.settingsContainer, new AdsDebugPreferencesFragment())
+                    .addToBackStack("Ads Debug").commit();
+            return true;
+        });
+
+        getPreferenceScreen().addPreference(adsDebugPref);
     }
 
     private void setupSearch() {
