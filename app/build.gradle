@@ -5,6 +5,13 @@ plugins {
 apply from: "../common.gradle"
 apply from: "../playFlavor.gradle"
 
+// Load keystore properties
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     namespace "de.danoeh.antennapod"
 
@@ -27,10 +34,18 @@ android {
         releaseConfig {
             enableV1Signing true
             enableV2Signing true
-            storeFile file(project.getProperties().getOrDefault("releaseStoreFile", "keystore"))
-            storePassword project.getProperties().getOrDefault("releaseStorePassword", "password")
-            keyAlias project.getProperties().getOrDefault("releaseKeyAlias", "alias")
-            keyPassword project.getProperties().getOrDefault("releaseKeyPassword", "password")
+            if (keystorePropertiesFile.exists()) {
+                storeFile rootProject.file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            } else {
+                // Fallback for CI/CD or when properties file doesn't exist
+                storeFile file(project.getProperties().getOrDefault("releaseStoreFile", "keystore"))
+                storePassword project.getProperties().getOrDefault("releaseStorePassword", "password")
+                keyAlias project.getProperties().getOrDefault("releaseKeyAlias", "alias")
+                keyPassword project.getProperties().getOrDefault("releaseKeyPassword", "password")
+            }
         }
     }
 
@@ -139,10 +154,12 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
 }
 
-if (project.hasProperty("antennaPodPlayPublisherCredentials")) {
+// Google Play publishing configuration
+// To use: add nextcastPlayPublisherCredentials=/path/to/service-account.json to gradle.properties
+if (project.hasProperty("nextcastPlayPublisherCredentials")) {
     apply plugin: 'com.github.triplet.play'
     play {
-        track.set('alpha')
-        serviceAccountCredentials.set(file(antennaPodPlayPublisherCredentials))
+        track.set('internal') // Start with internal testing track
+        serviceAccountCredentials.set(file(nextcastPlayPublisherCredentials))
     }
 }

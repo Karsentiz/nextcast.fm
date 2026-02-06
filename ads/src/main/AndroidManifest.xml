@@ -6,12 +6,20 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application>
-        <!-- Google Ad Manager App ID - Required for Mobile Ads SDK -->
+        <!--
+            Google Ad Manager App ID - Required for Mobile Ads SDK
+
+            IMPORTANT: For production release, replace the test ID below with your
+            real Ad Manager App ID from https://admob.google.com/
+
+            Current value is a TEST App ID - ads will only show test ads.
+            Production format: ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX
+        -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-3940256099942544~3347511713"/>
 
-        <!-- Ad Manager flag -->
+        <!-- Flag indicating this app uses Google Ad Manager (GAM) -->
         <meta-data
             android:name="com.google.android.gms.ads.AD_MANAGER_APP"
             android:value="true"/>

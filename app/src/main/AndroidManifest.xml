@@ -100,6 +100,7 @@
             android:windowSoftInputMode="stateAlwaysHidden"
             android:launchMode="singleTask"
             android:exported="true">
+            <!-- Deep links for nextcast.fm domain (configure domain verification when ready) -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
@@ -107,7 +108,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="antennapod.org"
+                    android:host="nextcast.fm"
                     android:pathPrefix="/deeplink/main"
                     android:scheme="https" />
             </intent-filter>
@@ -118,7 +119,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="antennapod.org"
+                    android:host="nextcast.fm"
                     android:pathPrefix="/deeplink/search"
                     android:scheme="https" />
             </intent-filter>
@@ -216,16 +217,17 @@
                 <data android:scheme="itpc"/>
                 <data android:scheme="pcast"/>
                 <data android:scheme="feed"/>
-                <data android:scheme="antennapod-subscribe"/>
+                <data android:scheme="nextcast-subscribe"/>
             </intent-filter>
 
+            <!-- Deep link for nextcast.fm subscribe (configure domain verification when ready) -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:host="antennapod.org" />
+                <data android:host="nextcast.fm" />
                 <data android:pathPrefix="/deeplink/subscribe" />
                 <data android:scheme="http" />
                 <data android:scheme="https" />
