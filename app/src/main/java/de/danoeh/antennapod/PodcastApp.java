@@ -35,7 +35,12 @@ public class PodcastApp extends Application {
         ClientConfigurator.initialize(this);
         PreferenceUpgrader.checkUpgrades(this);
 
-        // Initialize ads system
-        AdsManager.getInstance(this).initialize();
+        // Initialize ads system (fail gracefully if SDK issues)
+        try {
+            AdsManager.getInstance(this).initialize();
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to initialize ads system", e);
+            // App continues without ads
+        }
     }
 }

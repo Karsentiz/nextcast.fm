@@ -10,6 +10,8 @@ import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ProcessLifecycleOwner;
 
+import android.util.Log;
+
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.admanager.AdManagerAdView;
 
@@ -34,24 +36,33 @@ import de.danoeh.antennapod.ads.policy.AdsPolicyManager;
  */
 public class AdsManager implements DefaultLifecycleObserver {
 
+    private static final String TAG = "AdsManager";
     private static AdsManager instance;
 
     private final Context context;
     private final AdsConfig config;
     private final AdsPolicyManager policy;
-    private final BannerAdManager bannerManager;
-    private final InterstitialAdManager interstitialManager;
-    private final AudioAdManager audioAdManager;
+    private BannerAdManager bannerManager;
+    private InterstitialAdManager interstitialManager;
+    private AudioAdManager audioAdManager;
 
     private boolean isInitialized = false;
+    private boolean initializationFailed = false;
 
     private AdsManager(Context context) {
         this.context = context.getApplicationContext();
         this.config = AdsConfig.getInstance(context);
         this.policy = AdsPolicyManager.getInstance(context);
-        this.bannerManager = new BannerAdManager(context);
-        this.interstitialManager = new InterstitialAdManager(context);
-        this.audioAdManager = new AudioAdManager(context);
+
+        // Create managers defensively - they don't do heavy init in constructors anymore
+        try {
+            this.bannerManager = new BannerAdManager(context);
+            this.interstitialManager = new InterstitialAdManager(context);
+            this.audioAdManager = new AudioAdManager(context);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to create ad managers", e);
+            initializationFailed = true;
+        }
     }
 
     /**
@@ -73,19 +84,31 @@ public class AdsManager implements DefaultLifecycleObserver {
             return;
         }
 
+        if (initializationFailed) {
+            // Manager creation failed, skip SDK init
+            Log.w(TAG, "Skipping ads initialization due to earlier failure");
+            isInitialized = true;
+            return;
+        }
+
         if (!config.isAdsEnabled()) {
             // Ads are disabled, don't initialize SDKs
             isInitialized = true;
             return;
         }
 
-        // Initialize Mobile Ads SDK
-        MobileAds.initialize(context, initializationStatus -> {
-            // SDK initialized
-        });
+        try {
+            // Initialize Mobile Ads SDK
+            MobileAds.initialize(context, initializationStatus -> {
+                Log.d(TAG, "Mobile Ads SDK initialized");
+            });
 
-        // Register lifecycle observer for session management
-        ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
+            // Register lifecycle observer for session management
+            ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to initialize Mobile Ads SDK", e);
+            initializationFailed = true;
+        }
 
         isInitialized = true;
     }
@@ -154,7 +177,7 @@ public class AdsManager implements DefaultLifecycleObserver {
                                        @NonNull BannerAdManager.Screen screen,
                                        @Nullable Long episodeId,
                                        @Nullable BannerAdManager.BannerCallback callback) {
-        if (!config.isAdsEnabled()) {
+        if (!config.isAdsEnabled() || bannerManager == null) {
             return null;
         }
         return bannerManager.loadBanner(container, screen, episodeId, callback);
@@ -165,7 +188,9 @@ public class AdsManager implements DefaultLifecycleObserver {
      * Call this when leaving the screen.
      */
     public void destroyBanner(@Nullable AdManagerAdView adView) {
-        bannerManager.destroyBanner(adView);
+        if (bannerManager != null) {
+            bannerManager.destroyBanner(adView);
+        }
     }
 
     // ============================================
@@ -179,7 +204,7 @@ public class AdsManager implements DefaultLifecycleObserver {
      * @param screenContext The screen/context for logging
      */
     public void preloadInterstitial(String screenContext) {
-        if (!config.isAdsEnabled()) {
+        if (!config.isAdsEnabled() || interstitialManager == null) {
             return;
         }
         interstitialManager.preload(screenContext);
@@ -196,7 +221,7 @@ public class AdsManager implements DefaultLifecycleObserver {
     public boolean tryShowInterstitial(@NonNull Activity activity,
                                         @NonNull String screenContext,
                                         @Nullable InterstitialAdManager.InterstitialCallback callback) {
-        if (!config.isAdsEnabled()) {
+        if (!config.isAdsEnabled() || interstitialManager == null) {
             return false;
         }
         return interstitialManager.tryShow(activity, screenContext, callback);
@@ -206,14 +231,14 @@ public class AdsManager implements DefaultLifecycleObserver {
      * Check if an interstitial is ready to show.
      */
     public boolean isInterstitialReady() {
-        return interstitialManager.isReady();
+        return interstitialManager != null && interstitialManager.isReady();
     }
 
     /**
      * Check if interstitial should be triggered on episode start.
      */
     public boolean shouldShowInterstitialOnEpisodeStart() {
-        return interstitialManager.shouldShowOnEpisodeStart();
+        return interstitialManager != null && interstitialManager.shouldShowOnEpisodeStart();
     }
 
     // ============================================
@@ -222,7 +247,9 @@ public class AdsManager implements DefaultLifecycleObserver {
 
     /**
      * Get the audio ad manager for integration with PlaybackService.
+     * May return null if initialization failed.
      */
+    @Nullable
     public AudioAdManager getAudioAdManager() {
         return audioAdManager;
     }
@@ -231,7 +258,7 @@ public class AdsManager implements DefaultLifecycleObserver {
      * Check if an audio ad should play for this episode.
      */
     public boolean shouldPlayAudioAd() {
-        if (!config.isAdsEnabled()) {
+        if (!config.isAdsEnabled() || audioAdManager == null) {
             return false;
         }
         return audioAdManager.shouldPlayAd();
@@ -258,8 +285,16 @@ public class AdsManager implements DefaultLifecycleObserver {
      * Call this when the app is being destroyed.
      */
     public void release() {
-        interstitialManager.clear();
-        audioAdManager.release();
-        ProcessLifecycleOwner.get().getLifecycle().removeObserver(this);
+        if (interstitialManager != null) {
+            interstitialManager.clear();
+        }
+        if (audioAdManager != null) {
+            audioAdManager.release();
+        }
+        try {
+            ProcessLifecycleOwner.get().getLifecycle().removeObserver(this);
+        } catch (Exception e) {
+            Log.e(TAG, "Error removing lifecycle observer", e);
+        }
     }
 }

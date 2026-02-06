@@ -71,6 +71,8 @@ public class AudioAdManager implements AdsLoader.AdsLoadedListener,
     private AudioAdCallback callback;
     private Long currentEpisodeId;
     private Runnable timeoutRunnable;
+    private boolean imaInitialized = false;
+    private boolean imaInitFailed = false;
 
     public AudioAdManager(Context context) {
         this.context = context.getApplicationContext();
@@ -78,22 +80,41 @@ public class AudioAdManager implements AdsLoader.AdsLoadedListener,
         this.logger = AdsLogger.getInstance(context);
         this.policy = AdsPolicyManager.getInstance(context);
         this.mainHandler = new Handler(Looper.getMainLooper());
-
-        initIma();
+        // IMA SDK initialization is deferred until first ad request
     }
 
-    private void initIma() {
-        sdkFactory = ImaSdkFactory.getInstance();
+    /**
+     * Initialize IMA SDK lazily on first use.
+     * @return true if initialization succeeded
+     */
+    private synchronized boolean ensureImaInitialized() {
+        if (imaInitialized) {
+            return true;
+        }
+        if (imaInitFailed) {
+            return false;
+        }
 
-        ImaSdkSettings settings = sdkFactory.createImaSdkSettings();
-        settings.setDebugMode(config.isDebugLogging());
+        try {
+            sdkFactory = ImaSdkFactory.getInstance();
 
-        // Create audio-only ad display container
-        adDisplayContainer = ImaSdkFactory.createAudioAdDisplayContainer(context, null);
+            ImaSdkSettings settings = sdkFactory.createImaSdkSettings();
+            settings.setDebugMode(config.isDebugLogging());
 
-        adsLoader = sdkFactory.createAdsLoader(context, settings, adDisplayContainer);
-        adsLoader.addAdsLoadedListener(this);
-        adsLoader.addAdErrorListener(this);
+            // Create audio-only ad display container
+            adDisplayContainer = ImaSdkFactory.createAudioAdDisplayContainer(context, null);
+
+            adsLoader = sdkFactory.createAdsLoader(context, settings, adDisplayContainer);
+            adsLoader.addAdsLoadedListener(this);
+            adsLoader.addAdErrorListener(this);
+
+            imaInitialized = true;
+            return true;
+        } catch (Exception e) {
+            android.util.Log.e(TAG, "Failed to initialize IMA SDK", e);
+            imaInitFailed = true;
+            return false;
+        }
     }
 
     /**
@@ -119,6 +140,12 @@ public class AudioAdManager implements AdsLoader.AdsLoadedListener,
 
         if (!policy.shouldPlayAudioAd()) {
             callback.onAdSkipped("Frequency cap not met");
+            return;
+        }
+
+        // Ensure IMA SDK is initialized
+        if (!ensureImaInitialized()) {
+            callback.onAdError("IMA SDK initialization failed");
             return;
         }
 

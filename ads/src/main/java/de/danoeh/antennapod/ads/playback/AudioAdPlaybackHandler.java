@@ -58,7 +58,7 @@ public class AudioAdPlaybackHandler implements AudioAdManager.AudioAdCallback {
     private final Handler mainHandler;
 
     private AdsManager adsManager;
-    private AudioAdManager audioAdManager;
+    private AudioAdManager audioAdManager; // May be null if initialization failed
     private boolean isWaitingForAd = false;
     private long pendingEpisodeId = -1;
 
@@ -68,7 +68,7 @@ public class AudioAdPlaybackHandler implements AudioAdManager.AudioAdCallback {
         this.mainHandler = new Handler(Looper.getMainLooper());
 
         this.adsManager = AdsManager.getInstance(context);
-        this.audioAdManager = adsManager.getAudioAdManager();
+        this.audioAdManager = adsManager.getAudioAdManager(); // May return null
     }
 
     /**
@@ -82,6 +82,12 @@ public class AudioAdPlaybackHandler implements AudioAdManager.AudioAdCallback {
     public void checkAndPlayPreroll(long episodeId) {
         // Record episode start for frequency tracking
         adsManager.recordEpisodeStart();
+
+        // Check if audio ad manager is available
+        if (audioAdManager == null) {
+            callback.onProceedWithContent();
+            return;
+        }
 
         // Check if we should play an audio ad
         if (!adsManager.shouldPlayAudioAd()) {
@@ -102,7 +108,7 @@ public class AudioAdPlaybackHandler implements AudioAdManager.AudioAdCallback {
      * Use this if user navigates away before ad loads.
      */
     public void cancelPendingAd() {
-        if (isWaitingForAd) {
+        if (isWaitingForAd && audioAdManager != null) {
             isWaitingForAd = false;
             audioAdManager.skipAd();
         }
@@ -112,28 +118,34 @@ public class AudioAdPlaybackHandler implements AudioAdManager.AudioAdCallback {
      * Check if an ad is currently playing.
      */
     public boolean isAdPlaying() {
-        return audioAdManager.isAdPlaying();
+        return audioAdManager != null && audioAdManager.isAdPlaying();
     }
 
     /**
      * Pause the current ad (e.g., when phone call comes in).
      */
     public void pauseAd() {
-        audioAdManager.pauseAd();
+        if (audioAdManager != null) {
+            audioAdManager.pauseAd();
+        }
     }
 
     /**
      * Resume the paused ad.
      */
     public void resumeAd() {
-        audioAdManager.resumeAd();
+        if (audioAdManager != null) {
+            audioAdManager.resumeAd();
+        }
     }
 
     /**
      * Skip the current ad and proceed to content.
      */
     public void skipAd() {
-        audioAdManager.skipAd();
+        if (audioAdManager != null) {
+            audioAdManager.skipAd();
+        }
         isWaitingForAd = false;
         callback.onProceedWithContent();
     }
@@ -142,7 +154,9 @@ public class AudioAdPlaybackHandler implements AudioAdManager.AudioAdCallback {
      * Release resources.
      */
     public void release() {
-        audioAdManager.release();
+        if (audioAdManager != null) {
+            audioAdManager.release();
+        }
     }
 
     // ============================================
